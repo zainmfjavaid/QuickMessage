@@ -28,13 +28,14 @@
                 height: fit-content;
                 font-size: 18px;
                 column-gap: 10px;
+                word-break: break-all;
+                white-space: normal;
             }
 
             .pfp {
                 min-width: 45px;
                 height: 45px;
                 border-radius: 22.5px;
-                background-color: red;
                 margin-top: 22.5px;
             }
 
@@ -71,20 +72,19 @@
             <input type="text" id="message-input" placeholder="Message" autocomplete="off" autofocus>
         </form>
         <script>
-            const userName = ' {{name}} ';
+            const userName = '{{ name }}';
+            const userpfpColor = '{{ pfp_color }}'
+
             const messageContainer = document.getElementById('messages');
 
             // Helper method for adding messages to the screen
-            const addMessage = (text, sender) => {
+            const addMessage = (text, sender, pfpColor) => {
                 const message = document.createElement('div');
                 message.className = 'message';
 
                 const pfp = document.createElement('div');
                 pfp.className = 'pfp';
-
-                if (sender != 'You') {
-                    pfp.style = 'background-color: green';
-                }
+                pfp.style = `background-color: ${pfpColor};`
 
                 const infoContainer = document.createElement('div');
                 const nameTag = document.createElement('p');
@@ -106,7 +106,7 @@
             const socket = new WebSocket('ws://' + location.host + '/message-socket');
             socket.addEventListener('message', ev => {
                 const data = JSON.parse(ev.data);
-                addMessage(data.text, data.sender);
+                addMessage(data.text, data.sender, data.pfpColor);
             });
 
             // Add user message to the messages container and send it to the socket
@@ -115,9 +115,10 @@
                 const textField = document.getElementById('message-input');
                 const message = {
                     text: textField.value,
-                    sender: userName.trim()
+                    sender: userName.trim(),
+                    pfpColor: userpfpColor
                 };
-                addMessage(textField.value, 'You');
+                addMessage(textField.value, 'You', userpfpColor);
                 socket.send(JSON.stringify(message));
                 textField.value = '';
             };

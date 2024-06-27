@@ -1,3 +1,4 @@
+import random as rd
 from flask import Flask, render_template, session, request, redirect
 from flask_sock import Sock
 
@@ -6,7 +7,7 @@ sock = Sock(app)
 app.secret_key = '<replace_with_secret_key>'
 
 connections = []
-
+pfp_colors = ['#e54d2e', '#8e4ec6', '#0090ff', '#30a46c', '#ffc53d', '#ffe629', '#7ce2fe']
 
 @app.route('/', methods=['GET', 'POST'])
 def landing():
@@ -16,7 +17,7 @@ def landing():
     if request.method == 'POST':
         name = request.form.get('name')
         if name:
-            session['user'] = {'name': name}
+            session['user'] = {'name': name, 'pfp_color': rd.choice(pfp_colors)}
             return redirect('/message')
     return render_template('landing.html')
 
@@ -25,7 +26,7 @@ def message():
     if not session.get('user'):
         return redirect('/')
     
-    return render_template('message.html', name=session['user']['name'])
+    return render_template('message.html', name=session['user']['name'], pfp_color=session['user']['pfp_color'])
 
 @sock.route('/message-socket')
 def message_socket(sock):
